@@ -508,7 +508,7 @@ class Cavity(object):
         
         return integral_scatt/integral_trans
     
-    def plot_T_T0(self, omega_l, N, plt_T=True, resonance=True, figpars=True, logy=False):
+    def plot_T_T0(self, omega_l, N, plt_T=True, resonance=True, production_figure=False, logy=False):
         """
         Plots the cavity's transmission.
         
@@ -527,8 +527,8 @@ class Cavity(object):
         resonance : bool
         If True, plots a dashed black line at the unshifted cavity resonance.
         
-        figpars : bool
-        If True, adjusts the figure's size and dpi according to the parameters in figpar.
+        production_figure : bool
+        If True, show publication-quality plots and save them as a pdf.
         
         Returns
         -------
@@ -541,7 +541,11 @@ class Cavity(object):
             
         Delta = (omega_l - self.omega_a)/2/pi
         
-        fig, ax = plt.subplots()
+        if production_figure:
+            plt.rcParams.update({'font.size':14})
+            fig, ax = plt.subplots(figsize=(6.34,3.94), dpi=500)
+        else:
+            fig, ax = plt.subplots()
         
         ax.plot(Delta, T_arr, 'k-')
         if resonance:
@@ -561,7 +565,7 @@ class Cavity(object):
         
         plt.show()
     
-    def plot_R(self, omega_l, N, resonance=True, figpars=True, logy=False):
+    def plot_R(self, omega_l, N, resonance=True, production_figure=False, logy=False):
         """
         Plots the cavity's reflection spectrum.
         
@@ -576,8 +580,8 @@ class Cavity(object):
         resonance : bool
         If True, plots a dashed black line at the unshifted cavity resonance.
         
-        figpars : bool
-        If True, adjusts the figure's size and dpi according to the parameters in figpar.
+        production_figure : bool
+        If True, show publication-quality plots and save them as a pdf.
         
         Returns
         -------
@@ -587,7 +591,11 @@ class Cavity(object):
             
         Delta = (omega_l - self.omega_a)/2/pi
         
-        fig, ax = plt.subplots()
+        if production_figure:
+            plt.rcParams.update({'font.size':14})
+            fig, ax = plt.subplots(figsize=(6.34,3.94), dpi=500)
+        else:
+            fig, ax = plt.subplots()
         
         ax.plot(Delta, R_arr, 'k-')
         if resonance:
@@ -604,7 +612,7 @@ class Cavity(object):
         
         plt.show()
 
-    def plot_ns(self, omega_l, N, trans=True, Rm=3.5, resonance=True, figpars=True, logy=False):
+    def plot_ns(self, omega_l, N, trans=True, Rm=3.5, resonance=True, production_figure=False, logy=False):
         """
         Plots the number of Raman/Rayleigh scattered photon per reflected or transmitted photon.
         
@@ -625,8 +633,11 @@ class Cavity(object):
         resonance : bool
         If True, plots a dashed black line at the unshifted cavity resonance.
         
-        figpars : bool
-        If True, adjusts the figure's size and dpi according to the parameters in figpar.
+        production_figure : bool
+        If True, show publication-quality plots and save them as a pdf.
+        
+        logy : bool
+        If True, use log scale for y.
         
         Returns
         -------
@@ -636,7 +647,11 @@ class Cavity(object):
             
         Delta = (omega_l - self.omega_a)/2/pi
         
-        fig, ax = plt.subplots()
+        if production_figure:
+            plt.rcParams.update({'font.size':14})
+            fig, ax = plt.subplots(figsize=(6.34,3.94), dpi=500)
+        else:
+            fig, ax = plt.subplots()
         
         ax.plot(Delta, ns_arr, 'k-')
         if resonance:
@@ -663,7 +678,7 @@ class Cavity(object):
         
         plt.show()
         
-    def plot_Ec(self, omega_l, N, resonance=True, figpars=True, logy=False):
+    def plot_Ec(self, omega_l, N, resonance=True, production_figure=False, logy=False):
         """
         Plots the intracavity intensity.
         
@@ -678,8 +693,11 @@ class Cavity(object):
         resonance : bool
         If True, plots a dashed black line at the unshifted cavity resonance.
         
-        figpars : bool
-        If True, adjusts the figure's size and dpi according to the parameters in figpar.
+        production_figure : bool
+        If True, show publication-quality plots and save them as a pdf.
+        
+        logy : bool
+        If True, use log scale for y.
         
         Returns
         -------
@@ -689,7 +707,11 @@ class Cavity(object):
             
         Delta = (omega_l - self.omega_a)/2/pi
         
-        fig, ax = plt.subplots()
+        if production_figure:
+            plt.rcParams.update({'font.size':14})
+            fig, ax = plt.subplots(figsize=(6.34,3.94), dpi=500)
+        else:
+            fig, ax = plt.subplots()
         
         ax.plot(Delta, Ec_arr, 'k-')
         if resonance:
@@ -706,7 +728,7 @@ class Cavity(object):
         
         plt.show()
         
-    def FI_per_phot(self, omega_l, N, trans=True, figpars=True, logy=False):
+    def FI_per_phot(self, omega_l, N, trans=True, production_figure=False, logy=False):
         """
         Plots the total Fisher information per transmitted/reflected photon.
         
@@ -722,8 +744,11 @@ class Cavity(object):
         trans : bool
         If True, plot FI per transmitted photon; otherwise, FI per reflected photon.
         
-        figpars : bool
-        If True, adjusts the figure's size and dpi according to the parameters in figpar.
+        production_figure : bool
+        If True, show publication-quality plots and save them as a pdf.
+        
+        logy : bool
+        If True, use log scale for y.
         
         Returns
         -------
@@ -734,7 +759,11 @@ class Cavity(object):
     
         x = (omega_l-self.omega_a)/2/pi #/(self.kappa/2)
         
-        fig_FI, ax_FI = plt.subplots()
+        if production_figure:
+            plt.rcParams.update({'font.size':14})
+            fig_FI, ax_FI = plt.subplots(figsize=(6.34,3.94), dpi=500)
+        else:
+            fig_FI, ax_FI = plt.subplots()
             
         ax_FI.plot(x, f_meas*1e5, 'k-', label='$F_{tot}$')
         if logy:
@@ -971,7 +1000,7 @@ def design(R, finesse, waist, omega_c, trans, loss=3.8e-6):
 
     return L, T1, T2, R1, R2, omega_c_new
 
-def meas(cav, n_detec, N, b, q, trans, power=False, raman_params=False, omega_laser=False):
+def meas(cav, n_detec, N, b, q, trans, power=False, raman_params=False, omega_laser=False, production_figure=False):
     """
     Atom number measurement uncertainty.
 
@@ -1002,6 +1031,13 @@ def meas(cav, n_detec, N, b, q, trans, power=False, raman_params=False, omega_la
     Contains the detuning (det) between the ground states such that \Delta_2 = \Delta_1 + det,
     the ratio between the matrix elements (r), and the decay branching ratio (B) to the other state.
 
+    omega_laser : float
+    If given, the laser probe will be parked at this frequency. If not, the function
+    will find the maximum Fisher Information position to place the probe.
+    
+    production_figure : bool
+    If True, show publication-quality plots and save them as a pdf.
+    
     Returns
     -------
     DN : float
@@ -1041,7 +1077,11 @@ def meas(cav, n_detec, N, b, q, trans, power=False, raman_params=False, omega_la
         # Zilong's paper computes DJ/DJ_SQL, DN/DN_SQL should be the same expression as the factors of 2 cancel
         DN += (4*prob*n_scatt*3.5)*N/4 # Raman = 3.5*Rayleigh. Factor of N/4 to compute DN and not DN/DN_SQL
         
-    fig, ax = plt.subplots()
+    if production_figure:
+        plt.rcParams.update({'font.size':14})
+        fig, ax = plt.subplots(figsize=(6.34,3.94), dpi=500)
+    else:
+        fig, ax = plt.subplots()
 
     ax.plot(n_out, DN, 'k-', label='$N={0:d}$'.format(int(N)))
     if trans:
@@ -1124,7 +1164,7 @@ print('The cavity\'s parameters are:',
      'waist = {0:.3f} micrometers'.format(SrF.waist),
      sep='\n')
 
-N = 100 # Number of molecules
+N = 1000 # Number of molecules
 N_up = N/2
 b = 3.5 # Assume 3.5 molecules are lost for each Rayleigh photon
 q = 0.2 # Detectors quantum efficiency
@@ -1142,15 +1182,16 @@ lim = 4 # Interval to plot
 omega_l = np.linspace(SrF.omega_c-lim, SrF.omega_c+lim, 500)
 
 # Fisher information per transmitted photon
-SrF.FI_per_phot(omega_l, N_up, trans=True, figpars=False)
+SrF.FI_per_phot(omega_l, N_up, trans=True, production_figure=True)
 # Intracavity field
-SrF.plot_Ec(omega_l, N_up, resonance=True, figpars=False)
+SrF.plot_Ec(omega_l, N_up, resonance=True, production_figure=True)
 # Transmission spectrum
-SrF.plot_T_T0(omega_l, N_up, plt_T=True, resonance=True, figpars=False)
+SrF.plot_T_T0(omega_l, N_up, plt_T=True, resonance=True, production_figure=True)
 # Reflection spectrum
-SrF.plot_R(omega_l, N_up, resonance=True, figpars=False)
+SrF.plot_R(omega_l, N_up, resonance=True, production_figure=True)
 # Raman scattered photons per transmitted photon
-SrF.plot_ns(omega_l, N_up, trans=True, Rm=3.5, resonance=True, figpars=False, logy=True)
+SrF.plot_ns(omega_l, N_up, trans=True, Rm=3.5, resonance=True, production_figure=True, logy=True)
 # Measurement
-meas(SrF, n_detec_1, N, b, q, power=power, raman_params=False, trans=True)
-meas(SrF, n_detec_1, N, b, q, power=power, raman_params=raman_params_0, trans=True)
+meas(SrF, n_detec_1, N, b, q, power=power, raman_params=False, trans=True, production_figure=True)
+meas(SrF, n_detec_1, N, b, q, power=power, raman_params=raman_params_0, trans=True, production_figure=True)
+meas(SrF, n_detec_1, N, b, q, power=power, raman_params=raman_params_2, trans=True, production_figure=True)
