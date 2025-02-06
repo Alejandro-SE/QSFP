@@ -779,7 +779,6 @@ class Cavity(object):
             
         plt.tight_layout()
     
-        plt.savefig('test.png')
         plt.show()
         
     def scan_measurement(self, N, det_dw, absrp, decay, limit, q_efficiency=1):
@@ -1102,8 +1101,8 @@ def meas(cav, n_detec, N, b, q, trans, power=False, raman_params=False, omega_la
     if power:
       # Factor to convert output photons to time in ms
       nu = 1e6*omega_l/2/pi # Frequency in Hz
-      print("Freq: ", nu)
-      print("Lambda: ", 1e9*3e8/nu)
+      #print("Freq: ", nu)
+      #print("Lambda: ", 1e9*3e8/nu)
       phot_to_ms = 1e3 * 1.054e-34 * nu / power # hbar in J*s
       if trans:
         phot_to_ms /= cav.T(omega_l, N_up)
@@ -1153,8 +1152,8 @@ L_cm = SrF.L*1e-4 # cm
 
 # Double-check
 print('The cavity\'s parameters are:',
-     'Length = {0:.8f} cm'.format(L_cm),
-     'Length = {0:.8f} um'.format(L),
+     'Length = {0:.5f} cm = {1:.0f} um'.format(L_cm, L),
+     'ΔL = {0:.0f} um'.format(2*ROC*1e4 - L),
      '(T1,R1) = ({0:.7f},{1:.7f})'.format(SrF.T1, SrF.R1),
      '(T2,R2) = ({0:.7f},{1:.7f})'.format(SrF.T2, SrF.R2),
      'finesse = {0:.1f}'.format(SrF.finesse), 
@@ -1182,16 +1181,16 @@ lim = 4 # Interval to plot
 omega_l = np.linspace(SrF.omega_c-lim, SrF.omega_c+lim, 500)
 
 # Fisher information per transmitted photon
-SrF.FI_per_phot(omega_l, N_up, trans=True, production_figure=True)
+SrF.FI_per_phot(omega_l, N_up, trans=True, production_figure=0)
 # Intracavity field
-SrF.plot_Ec(omega_l, N_up, resonance=True, production_figure=True)
+SrF.plot_Ec(omega_l, N_up, resonance=True, production_figure=0)
 # Transmission spectrum
-SrF.plot_T_T0(omega_l, N_up, plt_T=True, resonance=True, production_figure=True)
+SrF.plot_T_T0(omega_l, N_up, plt_T=True, resonance=True, production_figure=0)
 # Reflection spectrum
-SrF.plot_R(omega_l, N_up, resonance=True, production_figure=True)
+SrF.plot_R(omega_l, N_up, resonance=True, production_figure=0)
 # Raman scattered photons per transmitted photon
-SrF.plot_ns(omega_l, N_up, trans=True, Rm=3.5, resonance=True, production_figure=True, logy=True)
+SrF.plot_ns(omega_l, N_up, trans=True, Rm=3.5, resonance=True, production_figure=0, logy=0)
 # Measurement
-meas(SrF, n_detec_1, N, b, q, power=power, raman_params=False, trans=True, production_figure=True)
-meas(SrF, n_detec_1, N, b, q, power=power, raman_params=raman_params_0, trans=True, production_figure=True)
-meas(SrF, n_detec_1, N, b, q, power=power, raman_params=raman_params_2, trans=True, production_figure=True)
+meas(SrF, n_detec_1, N, b, q, power=power, raman_params=False, trans=True, production_figure=0)
+meas(SrF, n_detec_1, N, b, q, power=power, raman_params=raman_params_0, trans=True, production_figure=0)
+meas(SrF, n_detec_1, N, b, q, power=power, raman_params=raman_params_2, trans=True, production_figure=0)
