@@ -999,7 +999,7 @@ def design(R, finesse, waist, omega_c, trans, loss=3.8e-6):
 
     return L, T1, T2, R1, R2, omega_c_new
 
-def meas(cav, n_detec, N, b, q, trans, power=False, raman_params=False, omega_laser=False, production_figure=False):
+def meas(cav, n_detec, N, b, q, trans, power=False, raman_params=False, omega_laser=False, production_figure=False, ret_DN=False):
     """
     Atom number measurement uncertainty.
 
@@ -1036,6 +1036,9 @@ def meas(cav, n_detec, N, b, q, trans, power=False, raman_params=False, omega_la
     
     production_figure : bool
     If True, show publication-quality plots and save them as a pdf.
+    
+    ret_DN : float
+    If True, return the uncertainty values.
     
     Returns
     -------
@@ -1116,6 +1119,182 @@ def meas(cav, n_detec, N, b, q, trans, power=False, raman_params=False, omega_la
     plt.tight_layout()
     plt.show()
     
+    if ret_DN:
+        return DN, n_out
+
+def optimal_point(cav, N, b, q, trans=True):
+    """
+    Find the point and the number of output photons at the optimal measurement point.
+
+    Parameters
+    ----------
+    cav : Cavity
+        Cavity object to do the experiment.
+    N : float
+        Number of molecules.
+    b : float
+        Raman scattering per Rayleigh scattering.
+    q : float
+        Detector efficiency.
+        
+    Returns
+    -------
+    n_out : float
+        Number of output photons at the optimal point.
+    DN : float
+        Corresponfing uncertainty.
+    trans : bool
+    If True, transmission.
+    
+    """
+    N_up = N/2
+    
+    max_det = 0.6*sqrt(N_up*cav.eta*cav.gamma*cav.kappa) # Search peak FI between omega_c and a bit after the max splitting
+
+    omega_l_arr = np.linspace(cav.omega_c, cav.omega_c+max_det, 2049)
+    FI_arr = cav.F_meas(omega_l_arr, N_up, trans=trans)
+
+    optm_pos = np.argmax(FI_arr) # Maximum Fisher Information
+
+    f_meas = FI_arr[optm_pos]
+    omega_l = omega_l_arr[optm_pos]
+    
+    n_scatt = cav.n_phot_scatt(omega_l, N_up, 1, trans=trans) # Number of scattered photons per out photon
+    
+    return 1/sqrt(f_meas*b*n_scatt/q), 2*sqrt(b*n_scatt/q/f_meas)
+    
+def DN_finesse(finesse_list, waist_arr, omega_c, omega_a, kappa, Gamma):
+    """
+    Plots DN vs waist for several finesse values.
+
+    Parameters
+    ----------
+    finesse_list : tuple
+    Finesse values that will be used.
+    
+    waist_arr : np.ndarray
+    Array of waist [um].
+    
+    The rest are self-explanatory.
+    
+    Returns
+    -------
+    None.
+
+    """
+    DN_list = []
+    
+    N = 1000
+    b = 3.5
+    q = 0.2
+    
+    for finesse in finesse_list:
+        DN_arr = np.zeros_like(waist_arr)
+        for i in range(len(waist_arr)):
+            T = pi/finesse
+            R = 1 - T
+            
+            eta_max = cooperativity(finesse, waist_arr[i], omega_c)
+            eta_eff = eta_max/6
+            
+            L = pi*c/kappa/finesse
+            
+            omega_c = (pi*c/L)*np.round(omega_c*L/pi/c)
+            
+            cav = Cavity(L, T, T, R, R, eta_eff, eta_max, omega_c, omega_a, 
+                         kappa, Gamma)
+            DN_arr[i] = optimal_point(cav, N, b, q)[1]
+        
+        DN_list.append(DN_arr)
+        
+    fig, ax = plt.subplots()
+    
+    for i in range(len(finesse_list)):
+        ax.plot(waist_arr, DN_list[i]/(N/4), label='{0:.0f}'.format(finesse_list[i]*1e-3))
+    
+    ax.set_xlabel(r'Waist $[\mu m]$')
+    ax.set_ylabel(r'$(\Delta N)^2/SQL$')
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.legend(title=r'Finesse $(\times 10^{3})$')
+    
+    plt.show()
+    
+def DN_waist(waist_list, finesse_arr, omega_c, omega_a, kappa, Gamma):
+    """
+    Plots DN vs waist for several finesse values.
+
+    Parameters
+    ----------
+    finesse_list : tuple
+    Finesse values that will be used.
+    
+    waist_arr : np.ndarray
+    Array of waist [um].
+    
+    The rest are self-explanatory.
+    
+    Returns
+    -------
+    None.
+
+    """
+    DN_list = []
+    
+    N = 1000
+    b = 3.5
+    q = 0.2
+    
+    for waist in waist_list:
+        DN_arr = np.zeros_like(finesse_arr)
+        for i in range(len(finesse_arr)):
+            finesse = finesse_arr[i]
+            
+            T = pi/finesse
+            R = 1 - T
+            
+            L = pi*c/kappa/finesse
+            
+            omega_c = (pi*c/L)*np.round(omega_c*L/pi/c)
+            
+            eta_max = cooperativity(finesse, waist, omega_c)
+            eta_eff = eta_max/6
+            
+            cav = Cavity(L, T, T, R, R, eta_eff, eta_max, omega_c, omega_a, 
+                         kappa, Gamma)
+            DN_arr[i] = optimal_point(cav, N, b, q)[1]
+            print(i, finesse)
+            print(i, "=", optimal_point(cav, N, b, q)[1]/(N/4))
+        DN_list.append(DN_arr)
+        
+    fig, ax = plt.subplots()
+    
+    for i in range(len(waist_list)):
+        ax.plot(finesse_arr*1e-3, DN_list[i]/(N/4), label=r'{0:.0f} $\mu m$'.format(waist_list[i]))
+    
+    ax.set_xlabel(r'Finesse $(\times 10^{3})$')
+    ax.set_ylabel(r'$(\Delta N)^2/SQL$')
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.legend(title=r'Waist $[\mu m]$')
+    
+    plt.show()
+
+def test(finesse, waist, omega_a, omega_c, kappa, Gamma, N, b, q):
+    T = pi/finesse
+    R = 1 - T
+    
+    L = pi*c/kappa/finesse
+    
+    omega_c = (pi*c/L)*np.round(omega_c*L/pi/c)
+    
+    eta_max = cooperativity(finesse, waist, omega_c)
+    eta_eff = eta_max/6
+    
+    test = Cavity(L, T, T, R, R, eta_eff, eta_max, omega_c, omega_a, 
+                 kappa, Gamma)
+    print(optimal_point(test, N, b, q)[1]/(N/4))
+
 # Molecular properties (assume that of SrF)
 omega_a = 2*pi*451.97e6 # MHz
 Gamma = 2*pi* 6.6 # MHz
